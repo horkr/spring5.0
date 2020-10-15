@@ -529,7 +529,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Allows post-processing of the bean factory in context subclasses.
 				postProcessBeanFactory(beanFactory);
 
-				// Invoke factory processors registered as beans in the context.
+				// 调用bean工厂后置处理器。重要代码点，这里会将各种需要注册的bean都注册到容器中
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
@@ -538,19 +538,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Initialize message source for this context.
 				initMessageSource();
 
-				// Initialize event multicaster for this context.
+				// llh：初始化事件多播器 for this context，就是往容器中加入一个事件多播器。它相当于放哨的
 				initApplicationEventMulticaster();
 
-				// Initialize other special beans in specific context subclasses.
+				// 如果是spring boot，会在这里启动tomcat，有可能也会发送事件
 				onRefresh();
 
-				// Check for listener beans and register them.
+				//llh：注册监听器。会将监听器注册到多播器中，如果有早期事件（多播器初始化完成之前），多拨器还会广播到监听器中
+				//　当事件发生放哨的就会通知监听者
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
 				finishBeanFactoryInitialization(beanFactory);
 
-				// Last step: publish corresponding event.
+				// 这里还会发送事件，但此时多播器已经初始化完毕，算后期事件，需要自己调用多播器去广播
 				finishRefresh();
 			}
 
@@ -703,6 +704,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+		// llh：进去
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
@@ -763,6 +765,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initApplicationEventMulticaster() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		// 如果自己已经定义了就用自己的，否则用系统默认的，系统默认的是不支持异步的，要需要异步则需自己去定义一个继承SimpleApplicationEventMulticaster的bean并命名为“applicationEventMulticaster”
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster =
 					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
@@ -831,12 +834,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
+		// 将监听器的bean name加入到多播器中
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
 		for (String listenerBeanName : listenerBeanNames) {
 			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
 		}
 
 		// Publish early application events now that we finally have a multicaster...
+		//　获取早期待处理的监听事件，使用多播器广播出去，通知观察者
 		Set<ApplicationEvent> earlyEventsToProcess = this.earlyApplicationEvents;
 		this.earlyApplicationEvents = null;
 		if (earlyEventsToProcess != null) {

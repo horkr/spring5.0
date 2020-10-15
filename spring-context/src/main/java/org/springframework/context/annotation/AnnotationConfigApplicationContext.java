@@ -83,8 +83,11 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
+		//llh:创建bean定义读取器，和classpath下bean的扫描器
 		this();
+		//llh:将配置类注册到容器中
 		register(annotatedClasses);
+		//llh:核心步骤
 		refresh();
 	}
 
