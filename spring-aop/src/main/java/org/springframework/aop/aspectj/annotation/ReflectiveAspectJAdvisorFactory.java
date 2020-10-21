@@ -119,7 +119,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		// so that it will only instantiate once.
 		MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory =
 				new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
-
+		// 这里会getAdvisorMethods获取增强方法 ，进去
 		List<Advisor> advisors = new ArrayList<>();
 		for (Method method : getAdvisorMethods(aspectClass)) {
 			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
@@ -148,7 +148,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
 		final List<Method> methods = new ArrayList<>();
 		ReflectionUtils.doWithMethods(aspectClass, method -> {
-			// Exclude pointcuts
+			// 获取类的所有方法，除去 @Pointcut 标注的方法，且ReflectionUtils.USER_DECLARED_METHODS会过滤掉Object的方法和一些其他的
 			if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
 				methods.add(method);
 			}

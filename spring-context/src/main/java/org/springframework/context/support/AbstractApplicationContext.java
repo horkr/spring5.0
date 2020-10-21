@@ -548,7 +548,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				//　当事件发生放哨的就会通知监听者
 				registerListeners();
 
-				// Instantiate all remaining (non-lazy-init) singletons.
+				// 这里会实例化所有非懒加载的bean
 				finishBeanFactoryInitialization(beanFactory);
 
 				// 这里还会发送事件，但此时多播器已经初始化完毕，算后期事件，需要自己调用多播器去广播
