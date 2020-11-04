@@ -68,11 +68,10 @@ public class BeanFactoryAdvisorRetrievalHelper {
 		// 先从缓存中拿，因为下边找到了会放到缓存中
 		String[] advisorNames = this.cachedAdvisorBeanNames;
 		if (advisorNames == null) {
-			// Do not initialize FactoryBeans here: We need to leave all regular beans
 			// 去容器中找Advisor.class的bean name，aop方面这里是找不到的，因为类继承体系里没有继承此类，其实这个方法findAdvisorBeans()是来找事物切面的
+			//找到org.springframework.transaction.config.internalTransactionAdvisor，此bean是在ProxyTransactionManagementConfiguration中注入的
 			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 					this.beanFactory, Advisor.class, true, false);
-			// 此处是放到缓存中
 			this.cachedAdvisorBeanNames = advisorNames;
 		}
 		if (advisorNames.length == 0) {

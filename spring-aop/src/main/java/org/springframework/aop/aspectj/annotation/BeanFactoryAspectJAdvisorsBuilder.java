@@ -98,7 +98,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 							continue;
 						}
 						// We must be careful not to instantiate beans eagerly as in this case they
-						// would be cached by the Spring container but would not have been weaved.
+						// 通过bean name获取beanType
 						Class<?> beanType = this.beanFactory.getType(beanName);
 						if (beanType == null) {
 							continue;
@@ -110,8 +110,10 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
+								// 找到此类中的所有增强器（增强器就是将增强方法封装成一个对象），这里要进去
  								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
 								if (this.beanFactory.isSingleton(beanName)) {
+									// 这里找到后会放到缓存中，key为beanName，value是类里边所有的增强器
 									this.advisorsCache.put(beanName, classAdvisors);
 								}
 								else {
@@ -132,6 +134,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 							}
 						}
 					}
+					// 这里又会把切面类的beanname放到aspectBeanNames
 					this.aspectBeanNames = aspectNames;
 					return advisors;
 				}

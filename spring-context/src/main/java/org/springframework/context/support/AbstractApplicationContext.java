@@ -516,13 +516,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
-			// Prepare this context for refreshing.
+			// 初始化资源文件，校验资源文件，创建保存早期事件的容器
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
-			// Prepare the bean factory for use in this context.
+			// 为容器注册一些默认组件，
 			prepareBeanFactory(beanFactory);
 
 			try {
@@ -541,7 +541,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// llh：初始化事件多播器 for this context，就是往容器中加入一个事件多播器。它相当于放哨的
 				initApplicationEventMulticaster();
 
-				// 如果是spring boot，会在这里启动tomcat，有可能也会发送事件
+				// 开放式接口，由子类实现，如果是spring boot，会在这里启动tomcat，有可能也会发送事件
 				onRefresh();
 
 				//llh：注册监听器。会将监听器注册到多播器中，如果有早期事件（多播器初始化完成之前），多拨器还会广播到监听器中
@@ -593,11 +593,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			logger.info("Refreshing " + this);
 		}
 
-		// Initialize any placeholder property sources in the context environment.
+		/**
+		 * 	初始化资源文件，默认什么事情都不做.自己实现的方法可以复写它,这样在启动environment变量配置中必须要有zzz变量才能启动
+		 *        @Override
+		 *    protected void initPropertySources() {
+		 * 		getEnvironment().setRequiredProperties("zzz");
+		 *    }
+ 		 */
 		initPropertySources();
 
-		// Validate that all properties marked as required are resolvable:
-		// see ConfigurablePropertyResolver#setRequiredProperties
+		// 这里会检查上一步要求的属性是否配置了，没有的话报错
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
@@ -612,6 +617,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Allow for the collection of early ApplicationEvents,
 		// to be published once the multicaster is available...
+		// 创建保存早期事件的容器
 		this.earlyApplicationEvents = new LinkedHashSet<>();
 	}
 

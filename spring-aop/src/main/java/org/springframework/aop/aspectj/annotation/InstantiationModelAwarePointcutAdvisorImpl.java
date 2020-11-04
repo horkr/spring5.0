@@ -107,9 +107,10 @@ class InstantiationModelAwarePointcutAdvisorImpl
 			this.lazy = true;
 		}
 		else {
-			// A singleton aspect.
+			// 这里才是关键代码，进入instantiateAdvice
 			this.pointcut = this.declaredPointcut;
 			this.lazy = false;
+			// 这里会实例化通知对象（就是增强方法）
 			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);
 		}
 	}

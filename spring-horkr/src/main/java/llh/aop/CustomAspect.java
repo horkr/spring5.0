@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-@EnableAspectJAutoProxy
+//@EnableAspectJAutoProxy(exposeProxy = true)
+@EnableAspectJAutoProxy()
 public class CustomAspect {
 
 	@Pointcut("execution(public * llh.aop.CustomService.*(..))")

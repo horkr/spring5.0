@@ -16,7 +16,11 @@ public class CustomServiceImpl implements CustomService{
 
 	@Override
 	public int get() {
-		System.err.println("reduce() invoke");
+		System.err.println("get() invoke");
+		int a = 1;
+		if(a==1){
+			throw new IllegalStateException("");
+		}
 		return 1;
 	}
 }
